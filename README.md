@@ -1,17 +1,17 @@
-# MongoDB Bond Alert System
+# Business Analytics Dashboard
 
-A modern, database-powered financial monitoring system using MongoDB. This project demonstrates how to build a production-ready alert system that replaces Excel-based monitoring with a scalable database solution.
+A modern, interactive business analytics dashboard powered by MongoDB Atlas and Flask. This project demonstrates how to build a comprehensive analytics platform with real-time data visualization, customizable reports, and professional UI design.
 
 ## 🚀 Quick Start
 
 ### 1. Clone and Setup
 ```bash
-git clone <your-repo-url>
-cd mongodb-bond-alert
+git clone https://github.com/LeviSantosAraujo/Business-Analytics-MongoDB.git
+cd Business-Analytics-MongoDB
 pip3 install -r requirements.txt
 ```
 
-### 2. Configure MongoDB
+### 2. Configure MongoDB Atlas
 ```bash
 # Copy configuration template
 cp config.py.example config.py
@@ -20,57 +20,83 @@ cp config.py.example config.py
 # Get free account at: https://www.mongodb.com/cloud/atlas
 ```
 
-### 3. Run the System
+### 3. Run the Dashboard
 ```bash
-python3 main.py
+python3 simple_app.py
 ```
+
+Then open your browser and navigate to: **http://localhost:5002**
 
 ## 📋 Project Structure
 
 ```
-mongodb-bond-alert/
-├── main.py                 # Main application entry point
-├── mongodb_bond_alert.py   # Core MongoDB functionality
+Business-Analytics-MongoDB/
+├── simple_app.py           # Main Flask application
+├── templates/
+│   └── simple_index.html   # Frontend dashboard
 ├── config.py.example       # Configuration template
 ├── requirements.txt        # Python dependencies
 ├── README.md              # This file
 ├── .gitignore            # Git ignore rules
-└── data/                 # Data exports (auto-created)
+├── business_analytics.py  # Analytics functions
+├── simple_analytics.py   # Simple analytics
+├── mongodb_atlas_setup.py # MongoDB setup
+├── query_examples.py      # Query examples
+└── generate_large_dataset.py # Data generation
 ```
 
 ## 🎯 Features
 
-- **🗄️ MongoDB Storage**: Replace Excel files with robust database
-- **🚨 Real-time Alerts**: Automatic threshold monitoring
-- **📊 Data Analysis**: Built-in correlation and statistics
-- **🔍 Historical Tracking**: Complete alert history
-- **📤 Export Options**: JSON data export functionality
-- **⚡ High Performance**: Optimized database queries
-- **🌐 Cloud Ready**: MongoDB Atlas integration
+- **� Interactive Dashboard**: Modern web-based analytics interface
+- **� Multiple Report Types**: Revenue, Sales, Margin, and Trend analysis
+- **�️ MongoDB Atlas**: Cloud database with realistic business data
+- **🎨 Professional UI**: Clean, modern design with graphite theme
+- **� Chart.js Integration**: Interactive charts with toggleable legends
+- **� Detailed Data Tables**: Comprehensive data with growth calculations
+- **🏠 Welcome Page**: Professional landing page with navigation
+- **💫 Watermark**: Developer attribution across all pages
+- **📱 Responsive Design**: Works on all screen sizes
 
 ## 🏗️ Architecture
 
+### Frontend Components
+- **Dashboard Layout**: Split-panel design with navigation and results
+- **Interactive Charts**: Bar charts with year-by-year comparison
+- **Data Tables**: Sortable, formatted data with growth metrics
+- **Navigation**: Radio button selection with visual feedback
+
+### Backend Components
+- **Flask Application**: RESTful API endpoints
+- **MongoDB Integration**: PyMongo for database operations
+- **Data Generation**: Realistic sample data with fluctuations
+- **Report Generation**: Dynamic report creation and formatting
+
 ### Database Design
-- **`bond_records`**: Historical financial data
-- **`alerts`**: Alert history and tracking
-- **Indexes**: Optimized for performance
+- **Business Data**: Revenue, Sales, and Profit Margin metrics
+- **Time Series**: 11 years of data (2015-2025)
+- **Realistic Patterns**: Business fluctuations and trends
 
-### Key Components
-- **MongoDBBondAlert**: Core database operations
-- **Alert Engine**: Threshold monitoring logic
-- **Data Import**: Excel to MongoDB migration
-- **Analytics**: Correlation and statistical analysis
+## 📊 Report Types
 
-## 📊 MongoDB vs Excel
+### 📈 Revenue Analysis
+- Total Revenue trends over time
+- Year-over-year growth calculations
+- Interactive bar charts with toggleable legends
 
-| Feature | Excel | MongoDB |
-|---------|-------|---------|
-| **Scalability** | Limited | Unlimited |
-| **Concurrent Access** | No | Yes |
-| **Query Performance** | Slow | Instant |
-| **Data Integrity** | Manual | Automatic |
-| **Backup/Recovery** | Manual | Built-in |
-| **Alert History** | No | Complete |
+### 💰 Sales Performance
+- Sales data visualization
+- Growth rate analysis
+- Comparative year-by-year metrics
+
+### 📊 Profit Margins
+- Margin percentage tracking
+- Change analysis over time
+- Visual representation of profitability
+
+### 📈 Trend Analysis
+- Multi-metric comparison
+- Comprehensive data overview
+- All fields in one report
 
 ## 🔧 Configuration
 
@@ -85,101 +111,91 @@ mongodb-bond-alert/
 ```python
 # config.py
 MONGODB_CONNECTION_STRING = "mongodb+srv://user:pass@cluster.mongodb.net"
-ALERT_THRESHOLD = 0.10  # 10%
+DATABASE_NAME = "business_analytics"
+COLLECTION_NAME = "business_data"
 ```
 
-## � Query Examples
+## 🎨 UI Features
 
-### Interactive Shell
-```bash
-python3 interactive_shell.py
-```
+### Navigation Panel
+- **Home Option**: Welcome page with feature overview
+- **Report Selection**: Radio buttons with highlighting
+- **Visual Feedback**: Hover effects and selection states
 
-### Query Examples
+### Results Panel
+- **Dynamic Content**: Changes based on selection
+- **Chart Visualization**: Interactive Chart.js graphs
+- **Data Tables**: Detailed information with formatting
+- **Professional Styling**: Consistent graphite theme
+
+### Welcome Page
+- **Feature Cards**: Clickable navigation to reports
+- **Database Overview**: Data volume information
+- **Getting Started**: Clear user guidance
+- **Professional Design**: Modern, clean interface
+
+## 📈 Usage Examples
+
+### Basic Navigation
 ```python
-# Basic queries
-records.find({'year': 2022})                    # Specific year
-records.find({'sp500_return': {'$gt': 0.20}})   # S&P > 20%
-records.count()                                 # Count all records
+# Access the dashboard
+http://localhost:5002
 
-# Advanced queries
-records.find({
-    '$or': [
-        {'sp500_return': {'$gt': 0.25}},
-        {'baa_bond_return': {'$gt': 0.10}}
-    ]
-})  # OR query
-
-# Aggregation
-records.aggregate([
-    {'$group': {'_id': None, 'avg_sp500': {'$avg': '$sp500_return'}}}
-])
+# Select report type from left panel
+# Charts and data load automatically
 ```
 
-### Query Capabilities
-- **Basic Queries**: Find, count, distinct
-- **Comparison Operators**: `$gt`, `$lt`, `$gte`, `$lte`, `$ne`
-- **Logical Operators**: `$and`, `$or`, `$nor`, `$not`
-- **Range Queries**: Find data within ranges
-- **Text Search**: Pattern matching and regex
-- **Aggregation Pipelines**: Complex data analysis
-- **Performance Queries**: Indexed and optimized queries
-
-## �📈 Usage Examples
-
-### Basic Monitoring
+### Data Visualization
 ```python
-from mongodb_bond_alert import MongoDBBondAlert
-
-# Initialize
-alert_system = MongoDBBondAlert(connection_string)
-
-# Check alerts
-alerts = alert_system.check_alerts(threshold=0.10)
-
-# Get statistics
-summary = alert_system.get_alert_summary()
+# Charts show 11 years of data (2015-2025)
+# Toggle years on/off with chart legends
+# View detailed data tables below charts
 ```
 
-### Data Analysis
+### Report Generation
 ```python
-# Historical data
-data = alert_system.get_historical_data(years=[2020, 2021, 2022])
-
-# Correlation analysis
-correlation = alert_system.get_correlation_analysis()
+# Revenue: Total_Revenue field analysis
+# Sales: Total_Sales field analysis  
+# Margin: Profit_Margin field analysis
+# Trend: All fields comparison
 ```
 
-## 🚀 Deployment
+## 🚀 Development
 
 ### Local Development
 ```bash
-python3 main.py
+# Install dependencies
+pip3 install -r requirements.txt
+
+# Configure database
+cp config.py.example config.py
+# Edit config.py with your MongoDB Atlas details
+
+# Run the application
+python3 simple_app.py
 ```
 
-### Production
-```bash
-# Set up environment variables
-export MONGODB_CONNECTION_STRING="your-connection-string"
-export ALERT_THRESHOLD=0.10
-
-# Run with monitoring
-python3 main.py
+### Customization
+```python
+# Modify data generation in generate_sample_data()
+# Update chart styles in createRevenueChart()
+# Change UI colors in CSS section
+# Add new report types in displayResults()
 ```
 
-## 📚 MongoDB Concepts Learned
+## 📚 MongoDB Concepts Demonstrated
 
-- **Collections**: Flexible schema containers
-- **Documents**: JSON-like data structures
-- **Indexes**: Performance optimization
-- **Aggregation**: Advanced data processing
-- **Queries**: Powerful filtering capabilities
+- **Document Storage**: Flexible JSON-like data structures
+- **Aggregation Pipelines**: Complex data processing
+- **Query Optimization**: Efficient data retrieval
+- **Cloud Integration**: MongoDB Atlas connectivity
+- **Data Modeling**: Business metrics structure
 
-## 🔒 Security Best Practices
+## 🔒 Security Features
 
 - ✅ Connection strings in `config.py` (not hardcoded)
 - ✅ `.gitignore` excludes sensitive files
-- ✅ Environment variables for production
+- ✅ Environment variables support
 - ✅ IP whitelisting in MongoDB Atlas
 
 ## 🤝 Contributing
@@ -193,19 +209,21 @@ python3 main.py
 ## 📞 Support
 
 - **MongoDB Docs**: https://docs.mongodb.com
-- **PyMongo Docs**: https://pymongo.readthedocs.io
+- **Flask Docs**: https://flask.palletsprojects.com
+- **Chart.js Docs**: https://www.chartjs.org
 - **MongoDB Atlas**: https://www.mongodb.com/cloud/atlas
 
 ## 🎓 Learning Outcomes
 
 After completing this project, you'll understand:
-- MongoDB database design and operations
-- Python database integration with PyMongo
-- Financial data modeling and analysis
-- Alert system architecture
-- Cloud database deployment
-- Production-ready code organization
+- MongoDB Atlas cloud database integration
+- Flask web application development
+- Chart.js data visualization
+- Professional UI/UX design
+- RESTful API development
+- Business analytics implementation
+- Modern web development best practices
 
 ---
 
-**Built with ❤️ using MongoDB and Python**
+**Built with ❤️ by Levi Araujo using MongoDB Atlas, Flask, and Chart.js**
