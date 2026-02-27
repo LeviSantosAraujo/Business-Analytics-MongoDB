@@ -1,0 +1,24 @@
+"""
+MongoDB Configuration Template
+Copy this to config.py and fill in your actual values
+"""
+
+# MongoDB Atlas Connection String
+# Get this from: Atlas -> Database -> Connect -> Connect your application
+MONGODB_CONNECTION_STRING = "mongodb+srv://bonduser:YOUR_PASSWORD@cluster.mongodb.net/?retryWrites=true&w=majority"
+
+# Database Configuration
+DATABASE_NAME = "bond_monitoring"
+
+# Alert Configuration
+ALERT_THRESHOLD = 0.10  # 10% threshold for alerts
+ALERT_CHECK_INTERVAL = 60  # seconds
+
+# Email Configuration (for alerts)
+EMAIL_SENDER = "your-email@gmail.com"
+EMAIL_RECIPIENT = "your-email@gmail.com"
+EMAIL_APP_PASSWORD = "your-app-password"  # Gmail App Password
+
+# Logging
+LOG_LEVEL = "INFO"
+LOG_FILE = "bond_alerts.log"

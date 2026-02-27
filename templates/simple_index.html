@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Analytics Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Tahoma', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #37474f 0%, #2c3e50 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 0;
+            position: relative;
+        }
+        
+        /* Watermark */
+        body::before {
+            content: "Developed by: Levi Araujo";
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 4.6em;
+            font-weight: bold;
+            color: rgba(200, 200, 200, 0.7);
+            z-index: 1;
+            pointer-events: none;
+            user-select: none;
+            font-family: 'Tahoma', 'Arial', sans-serif;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+            line-height: 1;
+        }
+        
+        /* Ensure content is above watermark */
+        .dashboard, .config-panel, .results-panel, .welcome-container {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+        
+        .dashboard {
+            display: flex;
+            gap: 0;
+            height: 100vh;
+            width: 100vw;
+        }
+        
+        .config-panel {
+            background: rgba(55, 55, 55, 0.95);
+            border-radius: 15px 0 0 15px;
+            padding: 15px 15px 10px 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            width: 280px;
+            flex-shrink: 0;
+            overflow-y: auto;
+            height: 100vh;
+        }
+        
+        .results-panel {
+            background: rgba(55, 55, 55, 0.95);
+            flex: 1;
+            overflow-y: auto;
+            height: 100vh;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .panel h2 {
+            color: #e0e0e0;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+        
+        .report-type {
+            display: block;
+            width: 100%;
+            padding: 20px;
+            margin-bottom: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .report-type.home-option {
+            margin-top: 20px;
+        }
+        
+        .report-type:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #6b7280;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(107, 114, 128, 0.2);
+        }
+        
+        .report-type input[type="radio"] {
+            display: none;
+        }
+        
+        .report-type input[type="radio"]:checked + div {
+            background: rgba(74, 85, 104, 0.5);
+            border: 2px solid #4a5568;
+            box-shadow: 0 0 20px rgba(74, 85, 104, 0.5);
+            transform: translateY(-1px);
+        }
+        
+        .report-type input[type="radio"]:checked + div:hover {
+            background: rgba(74, 85, 104, 0.6);
+            border-color: #2c3e50;
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(74, 85, 104, 0.6);
+        }
+        
+        .report-type .field-name {
+            font-weight: 700;
+            font-size: 1.0em;
+            font-family: 'Tahoma', 'Arial', sans-serif;
+        }
+        
+        .report-type .field-type {
+            font-size: 0.8em;
+            color: #b0b0b0;
+            font-family: 'Tahoma', 'Arial', sans-serif;
+            font-weight: 500;
+        }
+        
+        .field-selection, .year-selection {
+            max-height: 120px;
+            overflow-y: auto;
+            border: 1px solid #4a5568;
+            border-radius: 8px;
+            padding: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            background: #37474f;
+        }
+        
+        .field-item, .year-item {
+            display: flex;
+            align-items: center;
+            padding: 5px;
+            margin-bottom: 3px;
+            border-radius: 4px;
+            transition: background 0.2s;
+            color: #e0e0e0;
+        }
+        
+        .field-item:hover, .year-item:hover {
+            background: #4a5568;
+        }
+        
+        .field-item input, .year-item input {
+            margin-right: 8px;
+        }
+        
+        .field-label {
+            flex: 1;
+        }
+        
+        .field-name {
+            font-weight: 500;
+            font-size: 0.85em;
+            font-family: 'Tahoma', 'Arial', sans-serif;
+        }
+        
+        .field-type {
+            font-size: 0.7em;
+            color: #b0b0b0;
+            font-family: 'Tahoma', 'Arial', sans-serif;
+        }
+        
+        .chat-input {
+            display: none;
+            margin-bottom: 15px;
+        }
+        
+        .chat-input textarea {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-family: inherit;
+            resize: vertical;
+            font-size: 0.9em;
+        }
+        
+        .generate-btn {
+            display: none; /* Hide the generate button */
+        }
+        
+        .sample-preview {
+            margin-top: 10px;
+            padding: 10px;
+            background: #37474f;
+            border-radius: 8px;
+            font-size: 0.8em;
+            border: 1px solid #4a5568;
+        }
+        
+        .results {
+            min-height: 400px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #e0e0e0;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #6b7280;
+            border-top: 3px solid #e0e0e0;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        .welcome {
+            text-align: center;
+            padding: 60px 20px;
+            color: #e0e0e0;
+        }
+        
+        .welcome-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+        
+        .welcome-icon h1 {
+            font-size: 2em;
+            color: #e0e0e0;
+            text-align: center;
+        }
+        
+        .result-content {
+            background: #37474f;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .result-header {
+            background: #4a5568;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #e0e0e0;
+        }
+        
+        .section-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #e0e0e0;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #6b7280;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 15px;
+            background: #4a5568;
+            border-radius: 8px;
+            color: #e0e0e0;
+        }
+        
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #e0e0e0;
+        }
+        
+        .stat-label {
+            font-size: 0.8em;
+            color: #b0b0b0;
+            margin-top: 5px;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .table th, .table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #e1e8ed;
+        }
+        
+        .table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .insight-card {
+            display: flex;
+            align-items: flex-start;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .insight-icon {
+            font-size: 1.5em;
+            margin-right: 15px;
+        }
+        
+        .distribution-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .distribution-label {
+            width: 120px;
+            font-size: 0.9em;
+        }
+        
+        .distribution-progress {
+            flex: 1;
+            height: 20px;
+            background: #e1e8ed;
+            border-radius: 10px;
+            margin: 0 10px;
+            overflow: hidden;
+        }
+        
+        .distribution-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            transition: width 0.3s ease;
+        }
+        
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e1e8ed;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+
+        /* Welcome Page Styles */
+        .welcome-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 80px);
+            padding: 20px;
+        }
+
+        .welcome-content {
+            text-align: center;
+            max-width: 800px;
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        .welcome-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        .welcome-content h1 {
+            color: #e0e0e0;
+            font-size: 2.5em;
+            font-weight: 300;
+            margin-bottom: 10px;
+            font-family: 'Tahoma', 'Arial', sans-serif;
+        }
+
+        .welcome-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .feature-text h3 {
+            color: #e0e0e0;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+            font-family: 'Tahoma', 'Arial', sans-serif;
+        }
+
+        .feature-text p {
+            color: #b0b0b0;
+            font-size: 0.9em;
+            margin: 0;
+            font-family: 'Tahoma', 'Arial', sans-serif;
+        }
+
+        .welcome-instructions {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: left;
+            margin: 30px 0;
+        }
+
+        .welcome-instructions h3 {
+            color: #e0e0e0;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            font-family: 'Tahoma', 'Arial', sans-serif;
+        }
+
+        .welcome-instructions ol {
+            color: #b0b0b0;
+            font-size: 0.9em;
+            margin: 0;
+            padding-left: 20px;
+            font-family: 'Tahoma', 'Arial', sans-serif;
+        }
+
+        .welcome-instructions li {
+            margin-bottom: 8px;
+            font-family: 'Tahoma', 'Arial', sans-serif;
+        }
+
+        .welcome-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .stat-item {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #4a5568;
+            display: block;
+            font-family: 'Tahoma', 'Arial', sans-serif;
+        }
+
+        .stat-label {
+            color: #b0b0b0;
+            font-size: 0.8em;
+            margin-top: 5px;
+            font-family: 'Tahoma', 'Arial', sans-serif;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+            80% { transform: translateY(-2px); }
+            100% { transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Left Configuration Panel -->
+        <div class="config-panel">
+            <h1 style="margin-bottom: 20px; font-size: 1.5em; color: #e0e0e0;">📊 Business Analytics Dashboard</h1>
+            <h2 style="margin-bottom: 15px; color: #e0e0e0;">📋 Analytics Options</h2>
+                
+                <!-- Report Type Selection -->
+                <div style="margin-bottom: 20px;">
+                    <label class="block-label" style="font-weight: 600; margin-bottom: 10px; font-size: 0.9em; font-family: 'Tahoma', 'Arial', sans-serif;">Report Type</label>
+                    <div>
+                        <label class="report-type home-option">
+                            <input type="radio" name="report_type" value="home" checked>
+                            <div>
+                                <div class="field-name">🏠 Home</div>
+                                <div class="field-type">Welcome page</div>
+                            </div>
+                        </label>
+                        <label class="report-type">
+                            <input type="radio" name="report_type" value="revenue">
+                            <div>
+                                <div class="field-name">� Revenue</div>
+                                <div class="field-type">Revenue analysis</div>
+                            </div>
+                        </label>
+                        <label class="report-type">
+                            <input type="radio" name="report_type" value="sales">
+                            <div>
+                                <div class="field-name">� Sales</div>
+                                <div class="field-type">Sales analysis</div>
+                            </div>
+                        </label>
+                        <label class="report-type">
+                            <input type="radio" name="report_type" value="margin">
+                            <div>
+                                <div class="field-name">📊 Margin</div>
+                                <div class="field-type">Margin analysis</div>
+                            </div>
+                        </label>
+                        <label class="report-type">
+                            <input type="radio" name="report_type" value="trend">
+                            <div>
+                                <div class="field-name">📈 Trend</div>
+                                <div class="field-type">All fields comparison</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Auto-generate info -->
+                <div style="margin-top: 40px; padding: 20px; background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 12px; text-align: center;">
+                    <div style="font-size: 1.1em; color: #e0e0e0; font-family: 'Tahoma', 'Arial', sans-serif; font-weight: 500;">
+                        📊 Select an option to begin analysis
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Results Panel -->
+            <div class="results-panel">
+                <div id="results-container">
+                    <!-- Welcome page will be loaded here by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Global variables
+        let availableFields = [];
+        let availableYears = [];
+        let currentChart = null;
+        let autoGenerateTimer = null;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('=== DOM LOADED ===');
+            console.log('Starting dashboard initialization...');
+            
+            const container = document.getElementById('results-container');
+            console.log('Container found:', container);
+            
+            // Set welcome page immediately
+            if (container) {
+                console.log('Setting welcome page immediately...');
+                displayWelcomePage(container);
+                console.log('Welcome page set, HTML length:', container.innerHTML.length);
+                
+                // Check multiple times to see if it gets cleared
+                setTimeout(() => {
+                    console.log('Check 1s - HTML length:', container.innerHTML.length);
+                    console.log('Check 1s - First 100 chars:', container.innerHTML.substring(0, 100));
+                }, 1000);
+                
+                setTimeout(() => {
+                    console.log('Check 2s - HTML length:', container.innerHTML.length);
+                    console.log('Check 2s - First 100 chars:', container.innerHTML.substring(0, 100));
+                }, 2000);
+                
+                setTimeout(() => {
+                    console.log('Check 3s - HTML length:', container.innerHTML.length);
+                    console.log('Check 3s - First 100 chars:', container.innerHTML.substring(0, 100));
+                }, 3000);
+            }
+            
+            // Load other components after setting welcome page
+            console.log('Loading sample data...');
+            loadSampleData();
+            console.log('Setting up event listeners...');
+            setupEventListeners();
+            console.log('=== INITIALIZATION COMPLETE ===');
+        });
+
+        // Setup event listeners for auto-generation
+        function setupEventListeners() {
+            // Report type change handler
+            document.querySelectorAll('input[name="report_type"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    // Only auto-generate if not the home option
+                    if (this.value !== 'home') {
+                        autoGenerateReport();
+                    } else {
+                        // Show welcome page for home option
+                        const container = document.getElementById('results-container');
+                        displayWelcomePage(container);
+                    }
+                });
+            });
+
+            // Field selection change handler
+            document.getElementById('field-selection').addEventListener('change', function() {
+                autoGenerateReport();
+            });
+
+            // Year selection change handler
+            document.getElementById('year-selection').addEventListener('change', function() {
+                autoGenerateReport();
+            });
+        }
+
+        // Auto-generate report with debounce
+        function autoGenerateReport() {
+            const reportType = document.querySelector('input[name="report_type"]:checked').value;
+            
+            // Don't generate report for home option
+            if (reportType === 'home') {
+                const container = document.getElementById('results-container');
+                displayWelcomePage(container);
+                return;
+            }
+            
+            clearTimeout(autoGenerateTimer);
+            autoGenerateTimer = setTimeout(() => {
+                generateReport();
+            }, 500); // 500ms debounce
+        }
+
+        // Load available fields
+        async function loadFields() {
+            try {
+                const response = await fetch('/api/fields');
+                const data = await response.json();
+                
+                if (data.success) {
+                    availableFields = data.fields;
+                    renderFieldSelection();
+                }
+            } catch (error) {
+                console.error('Error loading fields:', error);
+            }
+        }
+
+        // Render field selection
+        function renderFieldSelection() {
+            const container = document.getElementById('field-selection');
+            container.innerHTML = '';
+            
+            availableFields.forEach(field => {
+                const fieldDiv = document.createElement('div');
+                fieldDiv.className = 'field-item';
+                fieldDiv.innerHTML = `
+                    <input type="checkbox" id="field_${field.value}" value="${field.value}" checked>
+                    <label for="field_${field.value}" class="field-label">
+                        <div class="field-name">${field.label}</div>
+                        <div class="field-type">Type: ${field.type}</div>
+                    </label>
+                `;
+                container.appendChild(fieldDiv);
+            });
+        }
+
+        // Load available years
+        async function loadYears() {
+            try {
+                const response = await fetch('/api/years');
+                const data = await response.json();
+                
+                if (data.success) {
+                    availableYears = data.years;
+                    renderYearSelection();
+                }
+            } catch (error) {
+                console.error('Error loading years:', error);
+            }
+        }
+
+        // Render year selection
+        function renderYearSelection() {
+            const container = document.getElementById('year-selection');
+            container.innerHTML = '';
+            
+            // Sort years from newest to oldest
+            const sortedYears = [...availableYears].sort((a, b) => b - a);
+            
+            // Add individual years - all checked by default
+            sortedYears.forEach(year => {
+                const yearDiv = document.createElement('div');
+                yearDiv.className = 'year-item';
+                yearDiv.innerHTML = `
+                    <input type="checkbox" id="year_${year}" value="${year}" checked>
+                    <label for="year_${year}">Year ${year}</label>
+                `;
+                container.appendChild(yearDiv);
+            });
+        }
+
+        // Load sample data
+        async function loadSampleData() {
+            try {
+                const response = await fetch('/api/sample_data');
+                const data = await response.json();
+                
+                if (data.success && data.data.length > 0) {
+                    const preview = document.getElementById('sample-preview');
+                    const sample = data.data[0];
+                    
+                    let html = '<div style="margin-top: 10px;">';
+                    Object.keys(sample).slice(0, 4).forEach(key => {
+                        let value = sample[key];
+                        if (typeof value === 'number') {
+                            if (key.includes('Revenue') || key.includes('Sales') || key.includes('Market_Cap')) {
+                                value = '$' + value.toLocaleString();
+                            } else if (key.includes('Margin') || key.includes('Growth')) {
+                                value = (value * 100).toFixed(2) + '%';
+                            }
+                        }
+                        html += `<div style="margin-bottom: 3px;"><strong>${key}:</strong> ${value}</div>`;
+                    });
+                    html += '</div>';
+                    preview.innerHTML = html;
+                }
+            } catch (error) {
+                console.error('Error loading sample data:', error);
+            }
+        }
+
+        // Get selected fields
+        function getSelectedFields() {
+            const reportType = document.querySelector('input[name="report_type"]:checked').value;
+            
+            // Return appropriate field based on report type
+            if (reportType === 'home') {
+                return []; // Home doesn't need fields
+            } else if (reportType === 'revenue') {
+                return ['Total_Revenue'];
+            } else if (reportType === 'sales') {
+                return ['Total_Sales'];
+            } else if (reportType === 'margin') {
+                return ['Profit_Margin'];
+            } else if (reportType === 'trend') {
+                return ['Total_Revenue', 'Total_Sales', 'Profit_Margin'];
+            }
+            
+            return [];
+        }
+
+        // Get selected years
+        function getSelectedYears() {
+            // Automatically return all available years since selection is removed
+            return ['2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015'];
+        }
+
+        // Generate report
+        async function generateReport() {
+            const reportType = document.querySelector('input[name="report_type"]:checked').value;
+            
+            // Don't generate report for home option
+            if (reportType === 'home') {
+                const container = document.getElementById('results-container');
+                displayWelcomePage(container);
+                return;
+            }
+            
+            const fields = getSelectedFields();
+            const years = getSelectedYears();
+            
+            if (fields.length === 0 || years.length === 0) {
+                return; // Don't generate if no selection
+            }
+            
+            try {
+                const response = await fetch('/api/generate_report', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        report_type: reportType,
+                        fields: fields,
+                        years: years
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    console.error('Error:', result.error);
+                    return;
+                }
+                
+                displayResults(result);
+                
+            } catch (error) {
+                console.error('Error generating report:', error);
+                container.innerHTML = `
+                    <div class="result-content">
+                        <div style="text-align: center; color: #e74c3c;">
+                            <div style="font-size: 2em; margin-bottom: 10px;">❌</div>
+                            <h3>Error generating report</h3>
+                            <p>${error.message}</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Display welcome page when no report is selected
+        function displayWelcomePage(container) {
+            console.log('Displaying welcome page...');
+            const welcomeHTML = `
+                <div style="text-align: center; padding: 40px; color: #e0e0e0;">
+                    <div style="font-size: 4em; margin-bottom: 20px;">📊</div>
+                    <h1 style="font-size: 2.5em; margin-bottom: 20px; font-family: 'Tahoma', 'Arial', sans-serif; color: #ffffff;">Business Analytics Dashboard</h1>
+                    <p style="font-size: 1.1em; margin-bottom: 40px; color: #e0e0e0;">
+                        Welcome to your comprehensive business analytics platform. Select a report type from the left panel or click any option below to begin your analysis.
+                    </p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 30px 0;">
+                        <div style="background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s ease;" onclick="selectReportType('revenue')">
+                            <div style="font-size: 2em; margin-bottom: 10px;">📈</div>
+                            <h3 style="color: #e0e0e0; font-size: 1.1em; margin-bottom: 5px;">Revenue Analysis</h3>
+                            <p style="color: #b0b0b0; font-size: 0.9em; margin: 0;">Track revenue trends and performance metrics</p>
+                        </div>
+                        <div style="background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s ease;" onclick="selectReportType('sales')">
+                            <div style="font-size: 2em; margin-bottom: 10px;">💰</div>
+                            <h3 style="color: #e0e0e0; font-size: 1.1em; margin-bottom: 5px;">Sales Performance</h3>
+                            <p style="color: #b0b0b0; font-size: 0.9em; margin: 0;">Monitor sales data and growth patterns</p>
+                        </div>
+                        <div style="background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s ease;" onclick="selectReportType('margin')">
+                            <div style="font-size: 2em; margin-bottom: 10px;">📊</div>
+                            <h3 style="color: #e0e0e0; font-size: 1.1em; margin-bottom: 5px;">Profit Margins</h3>
+                            <p style="color: #b0b0b0; font-size: 0.9em; margin: 0;">Analyze profitability and efficiency</p>
+                        </div>
+                        <div style="background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s ease;" onclick="selectReportType('trend')">
+                            <div style="font-size: 2em; margin-bottom: 10px;">📈</div>
+                            <h3 style="color: #e0e0e0; font-size: 1.1em; margin-bottom: 5px;">Trend Analysis</h3>
+                            <p style="color: #b0b0b0; font-size: 0.9em; margin: 0;">Compare all metrics over time</p>
+                        </div>
+                    </div>
+                    
+                    <!-- DATABASE OVERVIEW - PROMINENT SECTION -->
+                    <div style="text-align: center; margin-top: 30px; padding: 30px; background: rgba(74, 85, 104, 0.2); border: 3px solid #4a5568; border-radius: 12px; box-shadow: 0 0 20px rgba(74, 85, 104, 0.4);">
+                        <div style="font-size: 1.3em; color: #ffffff; font-family: 'Tahoma', 'Arial', sans-serif; margin-bottom: 15px;">
+                            <strong>📊 DATABASE OVERVIEW</strong>
+                        </div>
+                        <div style="font-size: 1.1em; color: #e0e0e0; margin-top: 10px; font-weight: 500;">
+                            <strong style="color: #ffffff; font-size: 1.2em;">1,247,532</strong> rows of business data available for analysis
+                        </div>
+                        <div style="font-size: 0.9em; color: #b0b0b0; margin-top: 8px;">
+                            Comprehensive business metrics spanning over a decade
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            console.log('Setting container HTML...');
+            container.innerHTML = welcomeHTML;
+            console.log('Welcome page HTML set successfully');
+            console.log('Container HTML length:', container.innerHTML.length);
+            console.log('Contains Database Overview:', container.innerHTML.includes('Database Overview'));
+            console.log('Contains 1,247,532:', container.innerHTML.includes('1,247,532'));
+        }
+
+        // Function to select report type from welcome page
+        function selectReportType(reportType) {
+            // Find and check the radio button
+            const radio = document.querySelector(`input[name="report_type"][value="${reportType}"]`);
+            if (radio) {
+                radio.checked = true;
+                // Trigger change event to auto-generate report
+                const event = new Event('change', { bubbles: true });
+                radio.dispatchEvent(event);
+            }
+        }
+
+        // Display results
+        function displayResults(result) {
+            const container = document.getElementById('results-container');
+            
+            const reportType = document.querySelector('input[name="report_type"]:checked').value;
+            
+            if (reportType === 'home') {
+                displayWelcomePage(container);
+                return;
+            }
+            
+            if (result.type === 'summary') {
+                // Check which field was requested to show the right report
+                if (reportType === 'revenue') {
+                    displayRevenueReport(result, container);
+                } else if (reportType === 'sales') {
+                    displaySalesReport(result, container);
+                } else if (reportType === 'margin') {
+                    displayMarginReport(result, container);
+                } else {
+                    displaySummaryReport(result, container);
+                }
+            } else if (result.type === 'trend') {
+                displayTrendReport(result, container);
+            }
+        }
+
+        // Display revenue report
+        function displayRevenueReport(result, container) {
+            let html = `
+                <div class="result-content">
+                    <div class="result-header">
+                        <h3>📈 Total Revenue Analysis</h3>
+                        <p>Revenue performance across years</p>
+                    </div>
+            `;
+            
+            // Chart section first
+            html += '<div class="section-title">📊 Revenue Visualization</div>';
+            html += '<div class="chart-container"><canvas id="revenue-chart"></canvas></div>';
+            
+            // Data section last
+            html += '<div class="section-title">📋 Detailed Revenue Data</div>';
+            html += '<div class="data-table-container"><table class="table">';
+            html += '<thead><tr style="background: transparent;"><th style="background: transparent; color: #e0e0e0; font-weight: 600;">Year</th><th style="background: transparent; color: #e0e0e0; font-weight: 600;">Total Revenue</th><th style="background: transparent; color: #e0e0e0; font-weight: 600;">Growth</th></tr></thead><tbody>';
+            
+            const years = result.years.length > 0 ? result.years : ['2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015'];
+            const chartData = result.raw_data || result.data;
+            years.forEach((year, index) => {
+                const yearData = chartData.find(row => row._id == parseInt(year));
+                const revenue = yearData ? yearData.Total_Revenue : 0;
+                const growth = index > 0 && yearData ? 
+                    ((revenue - (chartData.find(row => row._id == parseInt(years[index-1]))?.Total_Revenue || 0)) / (chartData.find(row => row._id == parseInt(years[index-1]))?.Total_Revenue || 1) * 100) : 0;
+                html += '<tr>';
+                html += `<td><strong>${year}</strong></td>`;
+                html += `<td>$${revenue.toLocaleString()}</td>`;
+                html += `<td>${growth > 0 ? '+' : ''}${growth.toFixed(1)}%</td>`;
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table></div>';
+            html += '</div>';
+            
+            container.innerHTML = html;
+            
+            // Create chart after DOM is updated
+            setTimeout(() => createRevenueChart(result), 100);
+        }
+
+        // Display sales report
+        function displaySalesReport(result, container) {
+            let html = `
+                <div class="result-content">
+                    <div class="result-header">
+                        <h3>💰 Total Sales Analysis</h3>
+                        <p>Sales performance across years</p>
+                    </div>
+            `;
+            
+            // Chart section first
+            html += '<div class="section-title">📊 Sales Visualization</div>';
+            html += '<div class="chart-container"><canvas id="sales-chart"></canvas></div>';
+            
+            // Data section last
+            html += '<div class="section-title">📋 Detailed Sales Data</div>';
+            html += '<div class="data-table-container"><table class="table">';
+            html += '<thead><tr style="background: transparent;"><th style="background: transparent; color: #e0e0e0; font-weight: 600;">Year</th><th style="background: transparent; color: #e0e0e0; font-weight: 600;">Total Sales</th><th style="background: transparent; color: #e0e0e0; font-weight: 600;">Growth</th></tr></thead><tbody>';
+            
+            const years = result.years.length > 0 ? result.years : ['2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015'];
+            const chartData = result.raw_data || result.data;
+            years.forEach((year, index) => {
+                const yearData = chartData.find(row => row._id == parseInt(year));
+                const sales = yearData ? yearData.Total_Sales : 0;
+                const growth = index > 0 && yearData ? 
+                    ((sales - (chartData.find(row => row._id == parseInt(years[index-1]))?.Total_Sales || 0)) / (chartData.find(row => row._id == parseInt(years[index-1]))?.Total_Sales || 1) * 100) : 0;
+                html += '<tr>';
+                html += `<td><strong>${year}</strong></td>`;
+                html += `<td>$${sales.toLocaleString()}</td>`;
+                html += `<td>${growth > 0 ? '+' : ''}${growth.toFixed(1)}%</td>`;
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table></div>';
+            html += '</div>';
+            
+            container.innerHTML = html;
+            
+            // Create chart after DOM is updated
+            setTimeout(() => createSalesChart(result), 100);
+        }
+
+        // Display margin report
+        function displayMarginReport(result, container) {
+            let html = `
+                <div class="result-content">
+                    <div class="result-header">
+                        <h3>📊 Profit Margin Analysis</h3>
+                        <p>Profit margin performance across years</p>
+                    </div>
+            `;
+            
+            // Chart section first
+            html += '<div class="section-title">📊 Margin Visualization</div>';
+            html += '<div class="chart-container"><canvas id="margin-chart"></canvas></div>';
+            
+            // Data section last
+            html += '<div class="section-title">📋 Detailed Margin Data</div>';
+            html += '<div class="data-table-container"><table class="table">';
+            html += '<thead><tr style="background: transparent;"><th style="background: transparent; color: #e0e0e0; font-weight: 600;">Year</th><th style="background: transparent; color: #e0e0e0; font-weight: 600;">Profit Margin</th><th style="background: transparent; color: #e0e0e0; font-weight: 600;">Change</th></tr></thead><tbody>';
+            
+            const years = result.years.length > 0 ? result.years : ['2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015'];
+            const chartData = result.raw_data || result.data;
+            years.forEach((year, index) => {
+                const yearData = chartData.find(row => row._id == parseInt(year));
+                const margin = yearData ? yearData.Profit_Margin : 0;
+                const change = index > 0 && yearData ? 
+                    ((margin - (chartData.find(row => row._id == parseInt(years[index-1]))?.Profit_Margin || 0)) * 100) : 0;
+                html += '<tr>';
+                html += `<td><strong>${year}</strong></td>`;
+                html += `<td>${(margin * 100).toFixed(2)}%</td>`;
+                html += `<td>${change > 0 ? '+' : ''}${change.toFixed(2)}%</td>`;
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table></div>';
+            html += '</div>';
+            
+            container.innerHTML = html;
+            
+            // Create chart after DOM is updated
+            setTimeout(() => createMarginChart(result), 100);
+        }
+
+        // Create revenue chart
+        function createRevenueChart(result) {
+            const ctx = document.getElementById('revenue-chart');
+            if (!ctx) return;
+            
+            const years = result.years.length > 0 ? result.years : ['2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015'];
+            const colors = ['#4a5568', '#2ecc71', '#f39c12', '#e74c3c', '#9b59b6', '#3498db', '#1abc9c', '#34495e', '#e67e22', '#95a5a6', '#16a085'];
+            
+            // Use raw_data for charts, fallback to data for compatibility
+            const chartData = result.raw_data || result.data;
+            
+            // Create datasets for each year with actual revenue data from backend
+            const datasets = years.map((year, i) => {
+                const yearData = chartData.find(row => row._id == parseInt(year));
+                const revenue = yearData ? yearData.Total_Revenue : 0;
+                return {
+                    label: year.toString(),
+                    data: [revenue],
+                    backgroundColor: colors[i % colors.length],
+                    borderWidth: 0
+                };
+            });
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Total Revenue'],
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Total Revenue - Year Comparison (2015-2025)',
+                            color: '#e0e0e0',
+                            font: {
+                                size: 16,
+                                family: "'Tahoma', 'Arial', sans-serif"
+                            }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#e0e0e0',
+                                font: {
+                                    family: "'Tahoma', 'Arial', sans-serif"
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#e0e0e0',
+                                callback: function(value) {
+                                    return '$' + (value / 1000000).toFixed(1) + 'M';
+                                }
+                            },
+                            grid: {
+                                color: '#6b7280'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Revenue (Millions)',
+                                color: '#e0e0e0'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#e0e0e0'
+                            },
+                            grid: {
+                                color: '#6b7280'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Create sales chart
+        function createSalesChart(result) {
+            const ctx = document.getElementById('sales-chart');
+            if (!ctx) return;
+            
+            const years = result.years.length > 0 ? result.years : ['2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015'];
+            const colors = ['#2ecc71', '#4a5568', '#f39c12', '#e74c3c', '#9b59b6', '#3498db', '#1abc9c', '#34495e', '#e67e22', '#95a5a6', '#16a085'];
+            
+            // Use raw_data for charts, fallback to data for compatibility
+            const chartData = result.raw_data || result.data;
+            
+            // Create datasets for each year with actual sales data from backend
+            const datasets = years.map((year, i) => {
+                const yearData = chartData.find(row => row._id == parseInt(year));
+                const sales = yearData ? yearData.Total_Sales : 0;
+                return {
+                    label: year.toString(),
+                    data: [sales],
+                    backgroundColor: colors[i % colors.length],
+                    borderWidth: 0
+                };
+            });
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Total Sales'],
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Total Sales - Year Comparison (2015-2025)',
+                            color: '#e0e0e0',
+                            font: {
+                                size: 16,
+                                family: "'Tahoma', 'Arial', sans-serif"
+                            }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#e0e0e0',
+                                font: {
+                                    family: "'Tahoma', 'Arial', sans-serif"
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#e0e0e0',
+                                callback: function(value) {
+                                    return '$' + (value / 1000000).toFixed(1) + 'M';
+                                }
+                            },
+                            grid: {
+                                color: '#6b7280'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Sales (Millions)',
+                                color: '#e0e0e0'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#e0e0e0'
+                            },
+                            grid: {
+                                color: '#6b7280'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Create margin chart
+        function createMarginChart(result) {
+            const ctx = document.getElementById('margin-chart');
+            if (!ctx) return;
+            
+            const years = result.years.length > 0 ? result.years : ['2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015'];
+            const colors = ['#f39c12', '#2ecc71', '#4a5568', '#e74c3c', '#9b59b6', '#3498db', '#1abc9c', '#34495e', '#e67e22', '#95a5a6', '#16a085'];
+            
+            // Use raw_data for charts, fallback to data for compatibility
+            const chartData = result.raw_data || result.data;
+            
+            // Create datasets for each year with actual margin data from backend
+            const datasets = years.map((year, i) => {
+                const yearData = chartData.find(row => row._id == parseInt(year));
+                const margin = yearData ? yearData.Profit_Margin : 0;
+                return {
+                    label: year.toString(),
+                    data: [margin],
+                    backgroundColor: colors[i % colors.length],
+                    borderWidth: 0
+                };
+            });
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Profit Margin'],
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Profit Margin - Year Comparison (2015-2025)',
+                            color: '#e0e0e0',
+                            font: {
+                                size: 16,
+                                family: "'Tahoma', 'Arial', sans-serif"
+                            }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#e0e0e0',
+                                font: {
+                                    family: "'Tahoma', 'Arial', sans-serif"
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#e0e0e0',
+                                callback: function(value) {
+                                    return (value * 100).toFixed(1) + '%';
+                                }
+                            },
+                            grid: {
+                                color: '#6b7280'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Profit Margin (%)',
+                                color: '#e0e0e0'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#e0e0e0'
+                            },
+                            grid: {
+                                color: '#6b7280'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Display trend report
+        function displayTrendReport(result, container) {
+            let html = `
+                <div class="result-content">
+                    <div class="result-header">
+                        <h3>📈 Trend Analysis</h3>
+                        <p>Year-over-year trends for ${result.fields.join(', ')}</p>
+                    </div>
+            `;
+            
+            // Chart section first
+            html += '<div class="section-title">📊 Visual Analytics</div>'
+            html += '<div class="chart-container"><canvas id="trend-chart-all"></canvas></div>';
+            
+            // Data section last
+            html += '<div class="section-title">📋 Detailed Trend Data</div>';
+            html += '<div class="data-table-container"><table class="table">';
+            
+            // Create header row with field names
+            html += '<thead><tr style="background: transparent;">';
+            result.fields.forEach(field => {
+                html += `<th style="background: transparent; color: #e0e0e0; font-weight: 600;">${field}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            // Add data rows
+            result.data.forEach(row => {
+                html += '<tr>';
+                result.fields.forEach(field => {
+                    if (field === 'Year') {
+                        html += `<td><strong>${row._id}</strong></td>`;
+                    } else if (field === 'Total_Revenue') {
+                        html += `<td>$${row[field].toLocaleString()}</td>`;
+                    } else if (field === 'Total_Sales') {
+                        html += `<td>$${row[field].toLocaleString()}</td>`;
+                    } else if (field === 'Profit_Margin') {
+                        html += `<td>${(row[field] * 100).toFixed(2)}%</td>`;
+                    }
+                });
+                
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table></div>';
+            html += '</div>';
+            
+            container.innerHTML = html;
+            
+            // Create chart after DOM is updated
+            setTimeout(() => createTrendChart(result), 100);
+        }
+
+        // Create trend chart - all fields in one chart
+        function createTrendChart(result) {
+            const ctx = document.getElementById('trend-chart-all');
+            if (!ctx) return;
+            
+            // Create line chart with all fields in one chart
+            const colors = ['#4a5568', '#2ecc71', '#f39c12'];
+            const years = result.years.length > 0 ? result.years : [2025, 2024, 2023, 2022, 2021, 2020];
+            
+            // Create datasets for each field
+            const datasets = result.fields.map((field, index) => {
+                if (field !== 'Year') {
+                    return {
+                        label: field,
+                        data: result.data.map(row => row[field]),
+                        borderColor: colors[index % colors.length],
+                        backgroundColor: colors[index % colors.length] + '20',
+                        tension: 0.1
+                    };
+                }
+            }).filter(dataset => dataset !== undefined);
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: years.map(year => year.toString()),
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'All Fields - Year Comparison',
+                            color: '#e0e0e0',
+                            font: {
+                                size: 16,
+                                family: "'Tahoma', 'Arial', sans-serif"
+                            }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#e0e0e0',
+                                font: {
+                                    family: "'Tahoma', 'Arial', sans-serif"
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                color: '#e0e0e0'
+                            },
+                            grid: {
+                                color: '#6b7280'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#e0e0e0'
+                            },
+                            grid: {
+                                color: '#6b7280'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Display comparison report
+        function displayComparisonReport(result, container) {
+            let html = `
+                <div class="result-content">
+                    <div class="result-header">
+                        <h3>🏆 Performance Comparison</h3>
+                        <p>Top and Bottom Performers for ${result.fields.join(', ')}</p>
+                    </div>
+            `;
+            
+            // Top performers
+            html += `
+                <h4 style="color: #27ae60; margin: 20px 0 10px;">🥇 Top 10 Performers</h4>
+                <table class="table">
+                    <thead>
+                        <tr>
+            `;
+            
+            result.fields.forEach(field => {
+                html += `<th>${field}</th>`;
+            });
+            
+            html += '</tr></thead><tbody>';
+            
+            result.data.top_performers.forEach(row => {
+                html += '<tr>';
+                result.fields.forEach(field => {
+                    let value = row[field];
+                    if (typeof value === 'number') {
+                        if (field.includes('Revenue') || field.includes('Sales') || field.includes('Market_Cap')) {
+                            value = '$' + value.toLocaleString();
+                        } else if (field.includes('Margin') || field.includes('Growth')) {
+                            value = (value * 100).toFixed(2) + '%';
+                        }
+                    }
+                    html += `<td>${value}</td>`;
+                });
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table>';
+            
+            // Bottom performers
+            html += `
+                <h4 style="color: #e74c3c; margin: 20px 0 10px;">📉 Bottom 10 Performers</h4>
+                <table class="table">
+                    <thead>
+                        <tr>
+            `;
+            
+            result.fields.forEach(field => {
+                html += `<th>${field}</th>`;
+            });
+            
+            html += '</tr></thead><tbody>';
+            
+            result.data.bottom_performers.forEach(row => {
+                html += '<tr>';
+                result.fields.forEach(field => {
+                    let value = row[field];
+                    if (typeof value === 'number') {
+                        if (field.includes('Revenue') || field.includes('Sales') || field.includes('Market_Cap')) {
+                            value = '$' + value.toLocaleString();
+                        } else if (field.includes('Margin') || field.includes('Growth')) {
+                            value = (value * 100).toFixed(2) + '%';
+                        }
+                    }
+                    html += `<td>${value}</td>`;
+                });
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        }
+
+        // Display distribution report
+        function displayDistributionReport(result, container) {
+            let html = `
+                <div class="result-content">
+                    <div class="result-header">
+                        <h3>📊 Distribution Analysis</h3>
+                        <p>Data distribution for ${result.fields.join(', ')}</p>
+                    </div>
+            `;
+            
+            Object.keys(result.data).forEach(field => {
+                const distribution = result.data[field];
+                html += `<h4 style="margin: 20px 0 10px;">${field}</h4>`;
+                
+                distribution.forEach(bucket => {
+                    const range = bucket._id === 'Other' ? 'Other' : `${bucket._id}`;
+                    const percentage = (bucket.count / 1100000) * 100;
+                    html += `
+                        <div class="distribution-bar">
+                            <div class="distribution-label">${range}</div>
+                            <div class="distribution-progress">
+                                <div class="distribution-fill" style="width: ${Math.min(percentage, 100)}%"></div>
+                            </div>
+                            <div class="distribution-value">${bucket.count.toLocaleString()} (${percentage.toFixed(1)}%)</div>
+                        </div>
+                    `;
+                });
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // Display chat report
+        function displayChatReport(result, container) {
+            let html = `
+                <div class="result-content">
+                    <div class="result-header">
+                        <h3>💬 AI Insights</h3>
+                        <p>Question: "${result.question}"</p>
+                    </div>
+            `;
+            
+            result.insights.forEach(insight => {
+                html += `
+                    <div class="insight-card">
+                        <div class="insight-icon">💡</div>
+                        <div>${insight}</div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                <div style="text-align: center; margin-top: 20px; color: #7f8c8d; font-size: 0.9em;">
+                    Analysis based on ${result.sample_count} sample records
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
