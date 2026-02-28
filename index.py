@@ -165,6 +165,35 @@ def generate_report():
             "raw_data": []
         })
 
+@app.route('/api/sample_data')
+def get_sample_data():
+    """Get sample data for preview"""
+    try:
+        # Generate sample data
+        sample_data = []
+        for i, year in enumerate(SAMPLE_YEARS):
+            revenue = 50000000 + (i * 5000000) + (i * 2500000 * (i % 2))
+            sales = 40000000 + (i * 4000000) + (i * 2000000 * (i % 2))
+            margin = 0.15 + (i * 0.02) - (i * 0.01 * (i % 2))
+            
+            sample_data.append({
+                "_id": int(year),
+                "Total_Revenue": revenue,
+                "Total_Sales": sales,
+                "Profit_Margin": margin
+            })
+        
+        return jsonify({
+            "success": True,
+            "data": sample_data
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "data": []
+        })
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(debug=False, host='0.0.0.0', port=port)
