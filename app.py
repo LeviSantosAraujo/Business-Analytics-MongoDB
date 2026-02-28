@@ -1,7 +1,7 @@
 """
 Vercel Python Template for Business Analytics Dashboard
 """
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, send_from_directory, request
 from pymongo import MongoClient
 import json
 from datetime import datetime
@@ -77,6 +77,13 @@ def generate_report():
             "years": years,
             "data": sample_data,
             "raw_data": sample_data
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "data": [],
+            "raw_data": []
         })
 
 if __name__ == '__main__':
