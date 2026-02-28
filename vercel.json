@@ -1,1 +1,1 @@
-{"version": 2, "builds": [{"src": "app.py", "use": "@vercel/python"}], "routes": [{"src": "app.py", "dest": "/"}]}# Vercel configuration for Business Analytics Dashboard
+{"version": 2, "builds": [{"src": "app.py", "use": "@vercel/python"}], "routes": [{"src": "app.py", "dest": "/"}]}
