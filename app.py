@@ -21,7 +21,7 @@ SAMPLE_YEARS = ["2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", 
 @app.route('/')
 def index():
     """Main dashboard page"""
-    return send_from_directory('templates', 'futuristic_index.html')
+    return send_from_directory('templates', 'simple_index.html')
 
 @app.route('/api/years')
 def get_years():
