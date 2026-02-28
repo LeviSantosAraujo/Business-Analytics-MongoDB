@@ -1,13 +1,13 @@
 """
 Vercel-compatible API wrapper for Business Analytics Dashboard
 """
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 from pymongo import MongoClient
 import json
 from datetime import datetime
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='templates')
 
 # Sample data for demo purposes
 SAMPLE_FIELDS = [
@@ -38,7 +38,18 @@ collection = get_mongodb_connection()
 @app.route('/')
 def index():
     """Main dashboard page"""
-    return app.send_static_file('simple_index.html')
+    try:
+        return send_from_directory('templates', 'simple_index.html')
+    except Exception as e:
+        return f"Error serving file: {str(e)}", 500
+
+@app.route('/<path:path>')
+def serve_static(path):
+    """Serve static files"""
+    try:
+        return send_from_directory('templates', path)
+    except Exception as e:
+        return f"Error serving file: {str(e)}", 500
 
 @app.route('/api/years')
 def get_years():
