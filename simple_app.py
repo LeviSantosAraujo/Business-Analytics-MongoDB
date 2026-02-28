@@ -7,6 +7,7 @@ from flask import Flask, render_template, request, jsonify
 from pymongo import MongoClient
 import json
 from datetime import datetime
+import os
 
 app = Flask(__name__)
 
@@ -407,6 +408,9 @@ def get_sample_data():
 
 if __name__ == '__main__':
     print("🚀 Starting Simple Business Analytics Dashboard...")
-    print("📊 Open http://localhost:5001 in your browser")
+    print("📊 Open http://localhost:5002 in your browser")
     print(f"🔗 MongoDB Connection: {'Connected' if collection is not None else 'Using Sample Data'}")
-    app.run(debug=True, host='0.0.0.0', port=5002)
+    
+    # Use port 5000 for Vercel compatibility
+    port = int(os.environ.get('PORT', 5002))
+    app.run(debug=False, host='0.0.0.0', port=port)
