@@ -667,7 +667,7 @@
             // Report type change handler
             document.querySelectorAll('input[name="report_type"]').forEach(radio => {
                 radio.addEventListener('change', function() {
-                    // Only auto-generate if not the home option
+                    // Only auto-generate if not home option
                     if (this.value !== 'home') {
                         autoGenerateReport();
                     } else {
@@ -676,16 +676,6 @@
                         displayWelcomePage(container);
                     }
                 });
-            });
-
-            // Field selection change handler
-            document.getElementById('field-selection').addEventListener('change', function() {
-                autoGenerateReport();
-            });
-
-            // Year selection change handler
-            document.getElementById('year-selection').addEventListener('change', function() {
-                autoGenerateReport();
             });
         }
 
